@@ -1,0 +1,178 @@
+db.createCollection("classes")
+db.classes.insert({
+... class : "College Algebra",
+... startDate : new Date(2016, 1, 11),
+... students : [
+... {fName : "Dale", lName : "Cooper", age : 42},
+... {fName : "Laura", lName : "Palmer", age : 22},
+... {fName : "Donna", lName : "Hayward", age : 21},
+... {fName : "Shelly", lName : "Johnson", age : 24}
+... ],
+... cost : 1500,
+... professor : "Rhonda Smith",
+... topics : "Rational Expressions,Linear Equations,Quadratic Equations",
+... book:
+... {
+... isbn: "0321671791",
+... title: "College Algebra",
+... price: 179.40
+... }
+... })
+{
+  acknowledged: true,
+  insertedIds: { '0': ObjectId('670d9fdbe4c6c39fb1ead8fb') }
+}
+classes> db.classes.insert({
+... class : "Astronomy 101",
+... startDate : new Date(2016, 1, 11),
+... students : [
+... {fName : "Bobby", lName : "Briggs", age : 21},
+...
+... {fName : "Laura", lName : "Palmer", age : 22},
+... {fName : "Audrey", lName : "Horne", age : 20}
+... ],
+... cost : 1650,
+... professor : "Paul Slugman",
+... topics : "Sun,Mercury,Venus,Earth,Moon,Mars",
+... book:
+... {
+... isbn: "0321815351",
+... title: "Astronomy: Beginning Guide to Univ",
+... price: 129.45
+... }
+... })
+{
+  acknowledged: true,
+  insertedIds: { '0': ObjectId('670d9fdbe4c6c39fb1ead8fc') }
+}
+classes> db.classes.insert({
+... class : "Geology 101",
+... startDate : new Date(2016, 1, 12),
+... students : [
+... {fName : "Andy", lName : "Brennan", age : 36},
+... {fName : "Laura", lName : "Palmer", age : 22},
+... {fName : "Audrey", lName : "Horne", age : 20}
+... ],
+... cost : 1450,
+... professor : "Alice Jones",
+... topics : "Earth,Moon,Elements,Minerals",
+... book:
+... {
+... isbn: "0321814061",
+... title: "Earth : An Introduction to Physical Geology",
+... price: 130.65
+... }
+... })
+{
+  acknowledged: true,
+  insertedIds: { '0': ObjectId('670d9fdbe4c6c39fb1ead8fd') }
+}
+classes> db.classes.insert({
+... class : "Biology 101",
+... startDate : new Date(2016, 1, 11),
+... students : [
+... {fName : "Andy", lName : "Brennan", age : 36},
+... {fName : "James", lName : "Hurley", age : 25},
+... {fName : "Harry", lName : "Truman", age : 41}
+... ],
+... cost : 1550,
+... professor : "Alice Jones",
+... topics : "Earth,Cell,Energy,Genetics,DNA",
+... book:
+... {
+...
+... isbn: "0547219474",
+... title: "Holt McDougal Biology",
+... price: 104.30
+... }
+... })
+{
+  acknowledged: true,
+  insertedIds: { '0': ObjectId('670d9fdce4c6c39fb1ead8fe') }
+}
+classes> db.classes.insert({
+... class : "Chemistry 101",
+... startDate : new Date(2016, 1, 13),
+... students : [
+... {fName : "Bobby", lName : "Briggs", age : 21},
+... {fName : "Donna", lName : "Hayward", age : 21},
+... {fName : "Audrey", lName : "Horne", age : 20},
+... {fName : "James", lName : "Hurley", age : 25}
+... ],
+... cost : 1600,
+... professor : "Alice Jones",
+... topics : "Matter,Energy,Atom,Periodic Table",
+... book:
+... {
+... isbn: "0547219474",
+... title: "Chemistry : Matter and Change",
+... price: 104.30
+... }
+... })
+--------------------------------------------------------------------------------------------------------------------------------------
+Queries:
+1. How many classes does “Alice Jones” teach
+2. Find the total no. of students enrolled for each class
+3. Find the total no. of classes conducted by each professor and also the total cost to
+attend each of the professor‟s classes
+--------------------------------------------------------------------------------------------------------------------------------------
+1.
+var mapfunction = function()
+... {
+... if(this.professor == "Alice Jones"){
+... emit(this.professor,1);
+... }
+... };
+var reducefunction = function(key,values)
+... {
+... return Array.sum(values);
+... };
+db.classes.mapReduce(mapfunction,reducefunction,{out:"No_of_classes_taught_by_Alice_Jones"})
+db.No_of_classes_taught_by_Alice_Jones.find()
+[ { _id: 'Alice Jones', value: 3 } ]
+
+2.
+var mapfunction = function () {
+... emit(this.class,this.students.length);
+... };
+var reducefunction = function(key,values){
+... return Array.sum(values);
+... };
+db.classes.mapReduce(mapfunction,reducefunction,{out:"No_of_students_enrolled_for_each_class"});
+classes> db.No_of_students_enrolled_for_each_class.find()
+[
+  { _id: 'Philosophy 101', value: 3 },
+  { _id: 'Geology 101', value: 3 },
+  { _id: 'Chemistry 101', value: 4 },
+  { _id: 'Astronomy 101', value: 3 },
+  { _id: 'College Algebra', value: 4 },
+  { _id: 'Biology 101', value: 3 }
+]
+
+
+3.
+var mapFunction = function() {
+...     emit(this.professor, { classCount: 1, totalCost: this.cost });
+... };
+var reduceFunction = function(key, values) {
+...     var reducedValue = { classCount: 0, totalCost: 0 };
+...     values.forEach(function(value) {
+...         reducedValue.classCount += value.classCount;
+...         reducedValue.totalCost += value.totalCost;
+...     });
+...     return reducedValue;
+... };
+
+db.classes.mapReduce(
+...     mapFunction,
+...     reduceFunction,
+...     { out: "professor_class_count_and_cost" }
+... )
+db.professor_class_count_and_cost.find()
+[
+  { _id: 'Paul Slugman', value: { classCount: 2, totalCost: 3250 } },
+  { _id: 'Alice Jones', value: { classCount: 3, totalCost: 4600 } },
+  { _id: 'Rhonda Smith', value: { classCount: 1, totalCost: 1500 } }
+]
+
+
