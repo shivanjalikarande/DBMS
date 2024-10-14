@@ -1,0 +1,210 @@
+ASSIGNMENT NO. 9
+
+db.createColletion(“Teacher”)
+db.Teacher.insertOne(
+[
+{name:"Prof.Deepika Polina",
+qualification:["ME","PhD"],dept_no:3, designation:"Assistant Professor",experience:{industry:0,teaching:4},salary:{basic:45000,TA:5000,DA:20000,HRA:15000},date_of_joining:new Date("2023-11-02"),appointment_nature:"Permanent",area_of_experience:["Operating System"]}
+])
+db.Teacher.insertMany(
+    [
+        {
+            name:"Mr.Amol Shah",
+            qualification:["MTech","Phd"],
+            dept_no:1,
+            dept_name:"Computer",
+            designation:"Professor",
+            experience:
+            {
+                industry:5,
+                teaching:4
+            },
+            salary:
+            {
+                basic:70000,
+                TA:10000,
+                DA:2000,
+                HRA:10000
+            },
+            date_of_joining:new Date("2020-9-25"),
+            appointment_nature:"Permanent",
+            area_of_expertise:["ML","Database"]
+        },
+        {
+            name:"Prof.Usha Patil",
+            qualification:["BE"],
+            dept_no:2,
+            dept_name:"Information Technology",
+            designation:"Associate Professor",
+            experience:
+            {
+                industry:2,
+                teaching:3
+            },
+            salary:
+            {
+                basic:40000,
+                TA:10000,
+                DA:20000,
+                HRA:15000
+            },
+            date_of_joining:new Date("2022-10-25"),
+            appointment_nature:"Adhoc",
+            area_of_expertise:["Artificial Intelligence","Computer Networks"]
+        }
+    ]
+)
+db.Teacher.find().pretty()
+[
+  {
+    '0': {
+      name: 'Prof.Deepika Polina',
+      qualification: [ 'ME', 'PhD' ],
+      dept_no: 3,
+      designation: 'Assistant Professor',
+      experience: { industry: 0, teaching: 4 },
+      salary: { basic: 45000, TA: 5000, DA: 20000, HRA: 15000 },
+      date_of_joining: ISODate('2023-11-02T00:00:00.000Z'),
+      appointment_nature: 'Permanent',
+      area_of_experience: [ 'Operating System' ]
+    },
+    _id: ObjectId('670d8971e4c6c39fb1ead8e7')
+  },
+  {
+    _id: ObjectId('670d8b10e4c6c39fb1ead8e8'),
+    name: 'Mr.Amol Shah',
+    qualification: [ 'MTech', 'Phd' ],
+    dept_no: 1,
+    dept_name: 'Computer',
+    designation: 'Professor',
+    experience: { industry: 5, teaching: 4 },
+    salary: { basic: 70000, TA: 10000, DA: 2000, HRA: 10000 },
+    date_of_joining: ISODate('2020-09-24T18:30:00.000Z'),
+    appointment_nature: 'Permanent',
+    area_of_expertise: [ 'ML', 'Database' ]
+  },
+  {
+    _id: ObjectId('670d8b10e4c6c39fb1ead8e9'),
+    name: 'Prof.Usha Patil',
+    qualification: [ 'BE' ],
+    dept_no: 2,
+    dept_name: 'Information Technology',
+    designation: 'Associate Professor',
+    experience: { industry: 2, teaching: 3 },
+    salary: { basic: 40000, TA: 10000, DA: 20000, HRA: 15000 },
+    date_of_joining: ISODate('2022-10-25T00:00:00.000Z'),
+    appointment_nature: 'Adhoc',
+    area_of_expertise: [ 'Artificial Intelligence', 'Computer Networks' ]
+  }
+]
+Teacher> db.Teacher.find({dept_name:"Computer"})
+[
+  {
+    _id: ObjectId('670d8b10e4c6c39fb1ead8e8'),
+    name: 'Mr.Amol Shah',
+    qualification: [ 'MTech', 'Phd' ],
+    dept_no: 1,
+    dept_name: 'Computer',
+    designation: 'Professor',
+    experience: { industry: 5, teaching: 4 },
+    salary: { basic: 70000, TA: 10000, DA: 2000, HRA: 10000 },
+    date_of_joining: ISODate('2020-09-24T18:30:00.000Z'),
+    appointment_nature: 'Permanent',
+    area_of_expertise: [ 'ML', 'Database' ]
+  }
+]
+Teacher> db.Teacher.find({salary:0,experience:0})
+
+Teacher> db.Teacher.find({$or:[{dept_name:"Computer"},{dept_name:"Information Technology"},{dept_name:"First Year"}]})
+[
+  {
+    _id: ObjectId('670d8b10e4c6c39fb1ead8e8'),
+    name: 'Mr.Amol Shah',
+    qualification: [ 'MTech', 'Phd' ],
+    dept_no: 1,
+    dept_name: 'Computer',
+    designation: 'Professor',
+    experience: { industry: 5, teaching: 4 },
+    salary: { basic: 70000, TA: 10000, DA: 2000, HRA: 10000 },
+    date_of_joining: ISODate('2020-09-24T18:30:00.000Z'),
+    appointment_nature: 'Permanent',
+    area_of_expertise: [ 'ML', 'Database' ]
+  },
+  {
+    _id: ObjectId('670d8b10e4c6c39fb1ead8e9'),
+    name: 'Prof.Usha Patil',
+    qualification: [ 'BE' ],
+    dept_no: 2,
+    dept_name: 'Information Technology',
+    designation: 'Associate Professor',
+    experience: { industry: 2, teaching: 3 },
+    salary: { basic: 40000, TA: 10000, DA: 20000, HRA: 15000 },
+    date_of_joining: ISODate('2022-10-25T00:00:00.000Z'),
+    appointment_nature: 'Adhoc',
+    area_of_expertise: [ 'Artificial Intelligence', 'Computer Networks' ]
+  }
+]
+Teacher> db.Teacher.find({dept_name:{$in:["Computer","Information Technology","First Year"]}})
+[
+  {
+    _id: ObjectId('670d8b10e4c6c39fb1ead8e8'),
+    name: 'Mr.Amol Shah',
+    qualification: [ 'MTech', 'Phd' ],
+    dept_no: 1,
+    dept_name: 'Computer',
+    designation: 'Professor',
+    experience: { industry: 5, teaching: 4 },
+    salary: { basic: 70000, TA: 10000, DA: 2000, HRA: 10000 },
+    date_of_joining: ISODate('2020-09-24T18:30:00.000Z'),
+    appointment_nature: 'Permanent',
+    area_of_expertise: [ 'ML', 'Database' ]
+  },
+  {
+    _id: ObjectId('670d8b10e4c6c39fb1ead8e9'),
+    name: 'Prof.Usha Patil',
+    qualification: [ 'BE' ],
+    dept_no: 2,
+    dept_name: 'Information Technology',
+    designation: 'Associate Professor',
+    experience: { industry: 2, teaching: 3 },
+    salary: { basic: 40000, TA: 10000, DA: 20000, HRA: 15000 },
+    date_of_joining: ISODate('2022-10-25T00:00:00.000Z'),
+    appointment_nature: 'Adhoc',
+    area_of_expertise: [ 'Artificial Intelligence', 'Computer Networks' ]
+  }
+]
+2. Find the information about all teachers
+db.Teacher.find()
+
+3. Find the information about all teachers of computer department
+db.Teacher.find({dept_name:"Computer"})
+
+4. Find the information about all teachersof computer, IT & first year departments
+db.Teacher.find({$or:[{dept_name:"Computer"},{dept_name:"Information Technology"},{dept_name:"First Year"}]})
+db.Teacher.find({dept_name:{$in:["Computer","Information Technology","First Year"]}})
+
+5. Find the information about all teachers of computer, IT and E&TC department
+having salary in between 70,000 and 1,00,000 (inclusive)
+db.Teacher.find({dept_name:{$in:["Computer","ENTC"]},"salary.basic":{$gte:70000,$lte:100000}})
+
+6. Update the experience of any teacher to 10 years and if the entry is not available
+in database consider the entry as new entry (use update function only)
+db.Teacher.update({dept_no:1},{$set:{"experience.teaching":10}},{upsert:true}) 
+
+7. Find the teachers‟ name and experience & arrange in decreasing order of
+experiencedb.Teacher.find({},{name:1,experience:1}).sort({"experience.teaching":-1});
+
+8. Use save() method to insert one entry in teachers collection
+db.Teacher.save()
+
+9. Useupdate() method to change the designation of teachers whose experience is
+10 yearsor above to Professor
+db.Teacher.updateMany({"experience.teaching":{$gte:10}},{$set:{designation:"Professor"}})
+
+11. Delete the documents from teachers collection having appointment_natureas
+“adhoc”.
+db.Teacher.deleteOne({"appointment_nature":"Adhoc"})
+
+12. Display with pretty() method, the first 3 documents in teachers collection in
+ascending orderof experience
+db.Teacher.find().limit(3).sort({"experience.teaching":1}).pretty()

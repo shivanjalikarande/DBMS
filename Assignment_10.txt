@@ -1,0 +1,65 @@
+db.createCollection("purchase_orders")
+db.purchase_orders.insertMany( [
+... {product: "toothbrush", total: 4.75, customer: "Mike"},
+... {product: "guitar", total: 199.99, customer: "Tom"},
+... {product: "milk", total: 11.33, customer: "Mike"},
+... {product: "pizza", total: 8.50, customer: "Karen"},
+... {product: "toothbrush", total: 4.75, customer: "Karen"},
+... {product: "pizza", total: 4.75, customer: "Dave"},
+... {product: "toothbrush", total: 4.75, customer: "Mike"}])
+
+1. Find out how many toothbrushes were sold
+2. Find how much money has been earned by selling the
+products toothbrushes and pizza.
+3. Find the list of all sold products
+4. Find the total amount of money spent by each customer
+5. Find how much has been spent on each product and sort it by
+amount spent
+6. Find the product with least earnings.
+7. Find how much money each customer has spent on
+toothbrushes and pizza8. Find the customer who has given highest business for the
+product toothbrush
+
+db.purchase_orders.aggregate([{$match:{product:"toothbrush"}},{$count:"toothbrushes_sold"}])
+[ { toothbrushes_sold: 3 } ]
+
+db.purchase_orders.aggregate([{$match:{product:{$in:["toothbrush","pizza"]}}},{$group:{_id:null,total_earned:{$sum:"$total"}}}])
+[ { _id: null, total_earned: 27.5 } ]
+
+db.purchase_orders.aggregate([{$group:{_id:"$product"}},{$project:{_id:null,product:"$_id"}}])
+[
+  { _id: null, product: 'pizza' },
+  { _id: null, product: 'toothbrush' },
+  { _id: null, product: 'guitar' },
+  { _id: null, product: 'milk' }
+]
+
+db.purchase_orders.aggregate([{$group:{_id:"$customer",total_spent:{$sum:"$total"}}}])
+[
+  { _id: 'Dave', total_spent: 4.75 },
+  { _id: 'Karen', total_spent: 13.25 },
+  { _id: 'Tom', total_spent: 199.99 },
+  { _id: 'Mike', total_spent: 20.83 }
+]
+
+
+db.purchase_orders.aggregate([{$group:{_id:"$product",total_spent:{$sum:"$total"}}},{$sort:{"total_spent":1}}])
+[
+  { _id: 'milk', total_spent: 11.33 },
+  { _id: 'pizza', total_spent: 13.25 },
+  { _id: 'toothbrush', total_spent: 14.25 },
+  { _id: 'guitar', total_spent: 199.99 }
+]
+
+db.purchase_orders.aggregate([{$group:{_id:"$product",earning:{$sum:"$total"}}},{$sort:{earning:1}},{$limit:1}])
+[ { _id: 'milk', earning: 11.33 } ]
+
+db.purchase_orders.aggregate([{$match:{product:{$in:["toothbrush","pizza"]}}},{$group:{_id:"$customer",total_spent:{$sum:"$total"}}}])
+[
+  { _id: 'Mike', total_spent: 9.5 },
+  { _id: 'Karen', total_spent: 13.25 },
+  { _id: 'Dave', total_spent: 4.75 }
+]
+
+db.purchase_orders.aggregate([{$match:{product:"toothbrush"}},{$group:{_id:"$customer",total_spent:{$sum:"$total"}}},{$sort:{total_spent:-1}},{$limit: 1}])
+[ { _id: 'Mike', total_spent: 9.5 } ]
