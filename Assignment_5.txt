@@ -1,0 +1,90 @@
+CREATE TABLE Account (
+        acc_no INT PRIMARY KEY,
+        branch_name VARCHAR(50),
+        balance DECIMAL(10, 2)
+    );
+CREATE TABLE Customer (
+     cust_name VARCHAR(100),
+     acc_no INT,
+     FOREIGN KEY (acc_no) REFERENCES Account(acc_no)
+ );
+CREATE TABLE Borrower (
+       cust_name VARCHAR(100),
+       loan_no INT
+   );
+CREATE TABLE Loan_Eligibility (
+       cust_name VARCHAR(100),
+       acc_no INT,
+       balance DECIMAL(10, 2),
+        FOREIGN KEY (acc_no) REFERENCES Account(acc_no)
+ );
+
+-- Inserting data into Account table
+INSERT INTO Account (acc_no, branch_name, balance) VALUES
+(1, 'Main Branch', 15000.00),
+(2, 'Secondary Branch', 8000.00),
+(3, 'Main Branch', 12000.00),
+(4, 'Tertiary Branch', 5000.00),
+(5, 'Main Branch', 25000.00);
+
+-- Inserting data into Customer table
+INSERT INTO Customer (cust_name, acc_no) VALUES
+('Alice Smith', 1),
+('Bob Johnson', 2),
+('Charlie Brown', 3),
+('Diana Prince', 4),
+('Ethan Hunt', 5);
+
+-- Inserting data into Borrower table
+INSERT INTO Borrower (cust_name, loan_no) VALUES
+('Alice Smith', 101),
+('Charlie Brown', 102);
+--------------------------------------------------------------------------------------------------------------------------------------
+DELIMITER $$
+CREATE PROCEDURE find_loan_eligible_customers()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE v_cust_name VARCHAR(100);
+    DECLARE v_acc_no INT;
+    DECLARE v_balance DECIMAL(10, 2);
+    
+    -- Declare a cursor to select customers without loans and balance > 10,000
+    DECLARE customer_cursor CURSOR FOR 
+        SELECT c.cust_name, c.acc_no, a.balance
+        FROM Customer c
+        JOIN Account a ON c.acc_no = a.acc_no
+        LEFT JOIN Borrower b ON c.cust_name = b.cust_name
+        WHERE b.cust_name IS NULL AND a.balance > 10000;
+
+    -- Declare a continue handler for the cursor
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    -- Open the cursor
+    OPEN customer_cursor;
+
+    read_loop: LOOP
+        -- Fetch data into variables
+        FETCH customer_cursor INTO v_cust_name, v_acc_no, v_balance;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+        -- Insert eligible customers into the loan_eligibility table
+        INSERT INTO Loan_Eligibility (cust_name, acc_no, balance)
+        VALUES (v_cust_name, v_acc_no, v_balance);
+    END LOOP;
+    -- Close the cursor
+    CLOSE customer_cursor;
+END $$
+DELIMITER ;
+
+select * from Loan_Eligibility;
+Empty set (0.00 sec)
+
+CALL find_loan_eligible_customers();
+
+select * from Loan_Eligibility;
++------------+--------+----------+
+| cust_name  | acc_no | balance  |
++------------+--------+----------+
+| Ethan Hunt |      5 | 25000.00 |
++------------+--------+----------+
