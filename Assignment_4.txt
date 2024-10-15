@@ -1,0 +1,144 @@
+create database Assign_4;
+create table Customer(
+    cust_name varchar(100),
+    acct_no int primary key,
+    balance int not null,
+    city varchar(40) not null
+);
+create table Loan(
+    loan_no int primary key,
+    branch_name varchar(50) not null,
+    amount int not null
+);
+create table Borrower(
+     acct_no int,
+     loan_no int,
+     foreign key(acct_no) references Customer(acct_no),
+     foreign key(loan_no) references Loan(loan_no),
+     primary key(acct_no,loan_no)
+);
+create table Borrower_Category(
+    -> acct_no int not null,
+    -> loan_no int,
+    -> branch_name varchar(40),
+    -> amount int,
+    -> category varchar(50),
+    -> primary key(acct_no,loan_no),
+    -> foreign key(acct_no,loan_no) references Borrower(acct_no,loan_no)
+    -> );
+INSERT INTO Customer (cust_name, acct_no, balance, city) VALUES ('Alice Smith', 101, 50000, 'New York'); 
+INSERT INTO Customer (cust_name, acct_no, balance, city) VALUES ('Bob Johnson', 102, 30000, 'Los Angeles'); 
+INSERT INTO Customer (cust_name, acct_no, balance, city) VALUES ('Charlie Brown', 103, 25000, 'Chicago'); 
+INSERT INTO Customer (cust_name, acct_no, balance, city) VALUES ('David Wilson', 104, 60000, 'Houston');
+ INSERT INTO Customer (cust_name, acct_no, balance, city) VALUES ('Emma Davis', 105, 45000, 'Phoenix'); 
+INSERT INTO Customer (cust_name, acct_no, balance, city) VALUES ('Fiona Green', 106, 70000, 'Philadelphia');
+select * from Customer;
++---------------+---------+---------+--------------+
+| cust_name     | acct_no | balance | city         |
++---------------+---------+---------+--------------+
+| Alice Smith   |     101 |   50000 | New York     |
+| Bob Johnson   |     102 |   30000 | Los Angeles  |
+| Charlie Brown |     103 |   25000 | Chicago      |
+| David Wilson  |     104 |   60000 | Houston      |
+| Emma Davis    |     105 |   45000 | Phoenix      |
+| Fiona Green   |     106 |   70000 | Philadelphia |
++---------------+---------+---------+--------------+
+
+INSERT INTO Loan (loan_no, branch_name, amount) VALUES (1, 'Downtown', 150000); 
+INSERT INTO Loan (loan_no, branch_name, amount) VALUES (2, 'Uptown', 80000); 
+INSERT INTO Loan (loan_no, branch_name, amount) VALUES (3, 'Suburban', 60000); 
+INSERT INTO Loan (loan_no, branch_name, amount) VALUES (4, 'Riverside', 100000); 
+INSERT INTO Loan (loan_no, branch_name, amount) VALUES (5, 'Westside', 120000);
+select * from Loan;
++---------+-------------+--------+
+| loan_no | branch_name | amount |
++---------+-------------+--------+
+|       1 | Downtown    | 150000 |
+|       2 | Uptown      |  80000 |
+|       3 | Suburban    |  60000 |
+|       4 | Riverside   | 100000 |
+|       5 | Westside    | 120000 |
++---------+-------------+--------+
+INSERT INTO Borrower (acct_no, loan_no) VALUES (101, 1); 
+INSERT INTO Borrower (acct_no, loan_no) VALUES (102, 2); 
+INSERT INTO Borrower (acct_no, loan_no) VALUES (103, 3); 
+INSERT INTO Borrower (acct_no, loan_no) VALUES (104, 4); 
+INSERT INTO Borrower (acct_no, loan_no) VALUES (105, 5); 
+INSERT INTO Borrower (acct_no, loan_no) VALUES (106, 1);
+select * from Borrower;
++---------+---------+
+| acct_no | loan_no |
++---------+---------+
+|     101 |       1 |
+|     106 |       1 |
+|     102 |       2 |
+|     103 |       3 |
+|     104 |       4 |
+|     105 |       5 |
++---------+---------+
+
+
+DELIMITER //
+CREATE PROCEDURE categorize_borrowers()
+BEGIN
+    -- Declare variables to hold loan details
+    DECLARE loan_amount INT;
+    DECLARE branch_name VARCHAR(50);
+    DECLARE v_acct_no INT;  -- Local variable for account number
+    DECLARE v_loan_no INT;  -- Local variable for loan number
+    DECLARE category VARCHAR(50);  -- Category variable
+    
+    -- Cursor to select borrower details
+    DECLARE borrower_cursor CURSOR FOR 
+        SELECT b.acct_no, l.loan_no, l.branch_name, l.amount
+        FROM Borrower b
+        JOIN Loan l ON b.loan_no = l.loan_no;
+    
+    -- Handler for cursor
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET loan_amount = NULL;
+
+    OPEN borrower_cursor;
+
+    read_loop: LOOP
+        FETCH borrower_cursor INTO v_acct_no, v_loan_no, branch_name, loan_amount;
+
+        IF loan_amount IS NULL THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Determine category based on loan amount
+        IF loan_amount >= 100000 THEN
+            SET category = 'Critical';
+        ELSEIF loan_amount >= 60000 THEN
+            SET category = 'Moderate';
+        ELSE
+            SET category = 'Nominal';
+        END IF;
+
+        -- Insert borrower details into Borrower_Category table
+        INSERT INTO Borrower_Category (acct_no, loan_no, branch_name, amount, category)
+        VALUES (v_acct_no, v_loan_no, branch_name, loan_amount, category);
+    END LOOP;
+
+    CLOSE borrower_cursor;
+END //
+DELIMITER ;
+
+
+select * from Borrower_Category;
+Empty set (0.00 sec)
+
+call categorize_borrowers();
+
+select * from Borrower_Category;
++---------+---------+-------------+--------+----------+
+| acct_no | loan_no | branch_name | amount | category |
++---------+---------+-------------+--------+----------+
+|     101 |       1 | Downtown    | 150000 | Critical |
+|     102 |       2 | Uptown      |  80000 | Moderate |
+|     103 |       3 | Suburban    |  60000 | Moderate |
+|     104 |       4 | Riverside   | 100000 | Critical |
+|     105 |       5 | Westside    | 120000 | Critical |
+|     106 |       1 | Downtown    | 150000 | Critical |
++---------+---------+-------------+--------+----------+
+6 rows in set (0.00 sec)
