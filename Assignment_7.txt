@@ -1,0 +1,177 @@
+CREATE TABLE EMPLOYEE (
+    Emp_Id INT PRIMARY KEY,
+    First_Name VARCHAR(100),
+    Last_Name VARCHAR(100),
+    Email VARCHAR(100),
+    Phone_No VARCHAR(15),
+    Hire_Date DATE,
+    Job_Profile VARCHAR(100),
+    Salary FLOAT,
+    HRA FLOAT
+);
+CREATE TABLE COMPANY_INFO (
+    Emp_Count INT,
+    Salary_Expenses FLOAT
+);
+CREATE TABLE EMP_LOG (
+    Emp_Id INT,
+    Old_Salary FLOAT,
+    New_Salary FLOAT,
+    Edit_Time TIMESTAMP,
+    Job_Status VARCHAR(20)
+);
+
+INSERT INTO Employee (Emp_Id, First_Name, Last_Name, Email, Phone_No, Hire_Date, Job_Profile, Salary, HRA)
+VALUES (5, 'Alice', 'Johnson', 'alice.johnson@example.com', '1112223333', CURDATE(), 'Analyst', 45000, 10);
+INSERT INTO Employee (Emp_Id, First_Name, Last_Name, Email, Phone_No, Hire_Date, Job_Profile, Salary, HRA)
+VALUES (8, 'Dell', 'Johnson', 'dell.johnson@example.com', '38489993', CURDATE(), 'Analyst', 55000, 15);
+
+
+
+1.	Before Insert
+DELIMITER $$
+CREATE TRIGGER before_insert_employee
+BEFORE INSERT ON Employee
+FOR EACH ROW
+BEGIN
+    SET NEW.First_Name = TRIM(NEW.First_Name);
+    SET NEW.Last_Name = TRIM(NEW.Last_Name);
+    SET NEW.Job_Profile = UPPER(NEW.Job_Profile);
+END$$
+DELIMITER ;
+
+2.	After Insert 
+DELIMITER $$
+CREATE TRIGGER after_insert_employee
+AFTER INSERT ON Employee
+FOR EACH ROW
+BEGIN
+-- Insert the log of new employee salary into EMP_LOG
+INSERT INTO Emp_Log (Emp_Id, Old_Salary, New_Salary, Job_Status)
+VALUES (NEW.Emp_Id, NULL, NEW.Salary, 'ACTIVE');
+    
+-- Update the COMPANY_INFO table
+UPDATE Company_Info
+SET Emp_Count = Emp_Count + 1,
+Salary_Expenses = Salary_Expenses + NEW.Salary;
+END$$
+DELIMITER ;
+
+3.	Before Update
+DELIMITER $$
+CREATE TRIGGER before_update_employee
+BEFORE UPDATE ON Employee
+FOR EACH ROW
+BEGIN
+    IF NEW.HRA >= 1 THEN
+        SET NEW.HRA = NEW.HRA / 100; -- Convert percentage to decimal
+    END IF;
+END$$
+DELIMITER ;
+
+4.	After Update
+DELIMITER $$
+CREATE TRIGGER after_update_employee
+AFTER UPDATE OF HRA ON Employee
+FOR EACH ROW
+BEGIN
+    -- Update EMP_LOG with the new salary
+    INSERT INTO Emp_Log (Emp_Id, Old_Salary, New_Salary, Job_Status)
+    VALUES (OLD.Emp_Id, OLD.Salary, NEW.Salary, 'UPDATED');
+    
+    -- Adjust COMPANY_INFO Salary_Expenses
+    UPDATE Company_Info
+    SET Salary_Expenses = Salary_Expenses - OLD.Salary + NEW.Salary;
+END$$
+DELIMITER ;
+
+5.	Before Delete
+DELIMITER $$
+CREATE TRIGGER before_delete_employee
+BEFORE DELETE ON Employee
+FOR EACH ROW
+BEGIN
+    -- Mark the employee as DELETED in EMP_LOG
+    INSERT INTO Emp_Log (Emp_Id, Old_Salary, Job_Status)
+    VALUES (OLD.Emp_Id, OLD.Salary, 'DELETED');
+END$$
+DELIMITER ;
+
+6.	After Delete
+DELIMITER $$
+CREATE TRIGGER after_delete_employee
+AFTER DELETE ON Employee
+FOR EACH ROW
+BEGIN
+    -- Update COMPANY_INFO after an employee is deleted
+    UPDATE Company_Info
+    SET Emp_Count = Emp_Count - 1,
+        Salary_Expenses = Salary_Expenses - OLD.Salary;
+END$$
+DELIMITER ;
+
+
+
+INSERT INTO Employee (Emp_Id, First_Name, Last_Name, Email, Phone_No, Hire_Date, Job_Profile, Salary, HRA)
+    -> VALUES (5, 'Alice', 'Johnson', 'alice.johnson@example.com', '1112223333', CURDATE(), 'Analyst', 45000, 10);
+
+SELECT * FROM Company_Info;
++-----------+-----------------+
+| Emp_Count | Salary_Expenses |
++-----------+-----------------+
+|         1 |           45000 |
++-----------+-----------------+
+INSERT INTO Employee (Emp_Id, First_Name, Last_Name, Email, Phone_No, Hire_Date, Job_Profile, Salary, HRA)
+    -> VALUES (8, 'Dell', 'Johnson', 'dell.johnson@example.com', '38489993', CURDATE(), 'Analyst', 55000, 15);
+SELECT * FROM Company_Info;
++-----------+-----------------+
+| Emp_Count | Salary_Expenses |
++-----------+-----------------+
+|         2 |          100000 |
++-----------+-----------------+
+.
+.
+.
+SELECT * FROM Employee;
++--------+------------+-----------+---------------------------+------------+------------+-------------+--------+------+
+| Emp_Id | First_Name | Last_Name | Email                     | Phone_No   | Hire_Date  | Job_Profile | Salary | HRA  |
++--------+------------+-----------+---------------------------+------------+------------+-------------+--------+------+
+|      1 | John       | Doe       | john.doe@example.com      | 1234567890 | 2024-10-15 | DEVELOPER   |  50000 | 0.12 |
+|      2 | Bob        | Smith     | bob.smith@example.com     | 4445556666 | 2024-10-15 | DEVELOPER   |  55000 | 0.12 |
+|      5 | Alice      | Johnson   | alice.johnson@example.com | 1112223333 | 2024-10-15 | ANALYST     |  45000 |   10 |
+|      8 | Dell       | Johnson   | dell.johnson@example.com  | 38489993   | 2024-10-15 | ANALYST     |  55000 |   15 |
++--------+------------+-----------+---------------------------+------------+------------+-------------+--------+------+
+UPDATE Employee SET HRA = 15 WHERE Emp_Id = 5;
+SELECT * FROM Employee;
++--------+------------+-----------+---------------------------+------------+------------+-------------+--------+------+
+| Emp_Id | First_Name | Last_Name | Email                     | Phone_No   | Hire_Date  | Job_Profile | Salary | HRA  |
++--------+------------+-----------+---------------------------+------------+------------+-------------+--------+------+
+|      1 | John       | Doe       | john.doe@example.com      | 1234567890 | 2024-10-15 | DEVELOPER   |  50000 | 0.12 |
+|      2 | Bob        | Smith     | bob.smith@example.com     | 4445556666 | 2024-10-15 | DEVELOPER   |  55000 | 0.12 |
+|      5 | Alice      | Johnson   | alice.johnson@example.com | 1112223333 | 2024-10-15 | ANALYST     |  45000 | 0.15 |
+|      8 | Dell       | Johnson   | dell.johnson@example.com  | 38489993   | 2024-10-15 | ANALYST     |  55000 |   15 |
++--------+------------+-----------+---------------------------+------------+------------+-------------+--------+------+
+
+
+SELECT * FROM Company_Info;
++-----------+-----------------+
+| Emp_Count | Salary_Expenses |
++-----------+-----------------+
+|         2 |          100000 | 
+DELETE FROM Employee WHERE Emp_Id = 8;
+SELECT * FROM Company_Info;
++-----------+-----------------+
+| Emp_Count | Salary_Expenses |
++-----------+-----------------+
+|         1 |           45000 |
++-----------+-----------------+
+SELECT * FROM Emp_log;
++--------+------------+------------+-----------+------------+
+| Emp_Id | Old_Salary | New_Salary | Edit_Time | Job_Status |
++--------+------------+------------+-----------+------------+
+|      1 |       NULL |      50000 | NULL      | ACTIVE     |
+|      2 |       NULL |      55000 | NULL      | ACTIVE     |
+|      5 |       NULL |      45000 | NULL      | ACTIVE     |
+|      8 |       NULL |      55000 | NULL      | ACTIVE     |
+|      8 |      55000 |       NULL | NULL      | DELETED    |
++--------+------------+------------+-----------+------------+
