@@ -1,0 +1,180 @@
+// Triggers
+
+/* - Database Trigger (All Types: Row level and Statement level triggers, Before and After 
+Triggers). Write a database trigger on Library table. The System should keep track of the records that 
+are being updated or deleted. The old value of updated or deleted records should be added in 
+Library_Audit table. 
+*/
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+ CREATE TABLE Books(
+ book_id int primary key auto_increment,
+ book_name varchar(30) not null,
+ author varchar(30));
+
+
+CREATE TABLE Library_Audit(
+id int primary key auto_increment,
+book_id int not null,
+book_name varchar(30) not null,
+author varchar(30),
+action_type varchar(20),
+action_time timestamp default current_timestamp);
+
+Query OK, 0 rows affected (0.03 sec)
+
+-----------------------------------------------------------------------------
+
+//1. Before INSERT
+
+delimiter $$
+create trigger before_insert
+before insert
+on Books
+For Each Row
+begin
+if new.book_id < 0 then
+signal sqlstate '45000' set message_text = "Negative ID not valid";
+end if;
+if new.book_name is NULL or new.book_name="" then
+signal sqlstate '45000' set message_text="Please enter book name.Can't be NULL";
+end if;
+end$$
+Query OK, 0 rows affected (0.02 sec)
+
+******************
+- insert into Books(book_name,author) values("Agnipankh","Dr. A.P.J.Abdul Kalam");
+- insert into Books(book_name,author) values("","Dr. A.P.J.Abdul Kalam");
+ERROR 1644 (45000): Please enter book name.Can't be NULL
+- insert into Books values(-1,"wise & otherwise","Sudha Murti");
+ERROR 1644 (45000): Negative ID not valid
+
+------------------------------------------------------------------------------
+
+//2. After INSERT
+
+create trigger after_insert
+after insert
+on Books
+For Each Row
+begin
+insert into Library_Audit(book_id,book_name,author,action_type) values (new.book_id,new.book_name,new.author,"Insert");
+end $$
+Query OK, 0 rows affected (0.02 sec)
+
+***************************
+- insert into Books(book_name,author) values("wise & otherwise","Sudha Murti");
+- insert into Books(book_name,author) values("Malgudi Days","R.K.Narayan");
+- insert into Books(book_name,author) values("Kimayagar","Jayant Narlikar");
+
+------------------------------------------------------------------------------
+
+3. Before UPDATE
+
+create trigger before_update
+before update
+on Books
+for each row
+begin
+if new.book_id < 0 then
+signal sqlstate '45000' set message_text="Invalid negative book id";
+end if;
+if new.book_name is NULL or new.book_name="" then
+signal sqlstate '45000' set message_text="Book name can't be null or empty";
+end if;
+end $$
+
+*************************
+
+- update Books set book_id = -1 where book_id = 3;
+ERROR 1644 (45000): Invalid negative book id
+
+----------------------------------------------------------------------------
+
+4. After UPDATE
+
+create trigger after_update
+after update
+on Books
+for each row
+begin
+update Library_Audit set book_id = new.book_id, book_name = new.book_name,author =
+new.author, action_type = "Update" where book_id = old.book_id;
+end $$
+
+**********************
+update Books set author="Dr.Jayant Narlikar" where book_id = 4;
+    -> $$
+Query OK, 1 row affected (0.02 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+------------------------------------------------------------------------------
+
+5. Before DELETE
+
+create trigger before_delete
+    -> before delete
+    -> on Books
+    -> for each row
+    -> begin
+    -> insert into Library_Audit(book_id,book_name,author,action_type) values (old.book_id,old.book_name,old.author,"Delete");
+    -> end $$
+Query OK, 0 rows affected (0.02 sec)
+
+******************
+
+
+------------------------------------------------------------------------------
+
+6 After DELETE
+
+ create table deletion_log(
+   log_id INT AUTO_INCREMENT PRIMARY KEY,
+   message varchar(100));
+Query OK, 0 rows affected (0.04 sec)
+
+***********************************
+
+create procedure delete_log(IN int bookId)
+  begin
+  insert into deletion_log(message) values(cancat("Deleted record with id ",bookId));
+  end $$
+Query OK, 0 rows affected (0.02 sec)
+
+*************************************
+
+create trigger after_delete
+after delete
+on Books
+for each row
+begin
+call delete_log(old.book_id);
+end $$
+**************
+ delete from Books where book_id = 5;
+ERROR 1644 (45000): Record Deleted Successfully
+----------------------------------------------------------------------------
+
+
+select * from Library_Audit;
++----+---------+------------------+--------------------+-------------+---------------------+
+| id | book_id | book_name        | author             | action_type | action_time         |
++----+---------+------------------+--------------------+-------------+---------------------+
+|  1 |       2 | wise & otherwise | Sudha Murti        | Insert      | 2024-11-05 10:03:12 |
+|  2 |       3 | Malgudi Days     | R.K.Narayan        | Insert      | 2024-11-05 10:05:02 |
+|  3 |       4 | Kimayagar        | Dr.Jayant Narlikar | Update      | 2024-11-05 10:05:38 |
+|  4 |       5 | XYZ              | ABC                | Insert      | 2024-11-05 10:36:09 |
+|  9 |       5 | XYZ              | ABC                | Delete      | 2024-11-05 11:11:19 |
++----+---------+------------------+--------------------+-------------+---------------------+
+5 rows in set (0.00 sec)
+
+mysql> select * from Books;
++---------+------------------+-----------------------+
+| book_id | book_name        | author                |
++---------+------------------+-----------------------+
+|       0 | wise & otherwise | Sudha Murti           |
+|       1 | Agnipankh        | Dr. A.P.J.Abdul Kalam |
+|       3 | Malgudi Days     | R.K.Narayan           |
+|       4 | Kimayagar        | Dr.Jayant Narlikar    |
++---------+------------------+-----------------------+
+4 rows in set (0.00 sec)
