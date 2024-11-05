@@ -1,0 +1,107 @@
+ create table old_emp(
+    -> emp_id int primary key,
+    -> fname varchar(30) not null,
+    -> lname varchar(30) not null,
+    -> salary int not null);
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> create table new_emp(
+    -> emp_id int primary key,
+    -> fname varchar(30) not null,
+    -> lname varchar(30) not null,
+    -> salary int not null);
+Query OK, 0 rows affected (0.03 sec)
+
+---------------------------------------------------------------------------------------------------------------------
+
+mysql> insert into old_emp
+    -> values
+    -> (
+    -> 19,"Shivanjali","Karande",2000),
+    -> (3,"Nikita","Londhe",3000),
+    -> (12,"Shrawani","Gaikwad",4000),
+    -> (5,"Sanjana","Ghorpade",10000);
+Query OK, 4 rows affected (0.02 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+mysql> insert into new_emp
+    -> values
+    -> (23,"Kalyani","Patil",3900),
+    -> (1,"Yashica","Mayaramani",4000),
+    -> (2,"Diya","Bhat",3000),
+    -> (3,"Nikita","Londhe",3000),
+    -> (5,"Sanjana","Ghorpade",10000);
+Query OK, 5 rows affected (0.01 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+---------------------------------------------------------------------------------------------------------- 
+
+create procedure merge_data()
+   BEGIN
+    declare done int default 0;
+    declare o_empid int;
+    declare o_fname varchar(30);
+    declare o_lname varchar(30);
+    declare o_salary int;
+    DECLARE emp_cur CURSOR for
+    select emp_id,fname,lname,salary from old_emp;
+    declare continue handler for NOT FOUND set done = 1;
+    OPEN emp_cur;
+       cur_loop: Loop
+       if done = 1 then
+       leave cur_loop;
+       end if;
+       fetch emp_cur into o_empid,o_fname,o_lname,o_salary;
+       if not exists(select emp_id from new_emp where fname = o_fname and lname = o_lname and salary = o_salary)
+       then
+       insert into new_emp values(o_empid,o_fname,o_lname,o_salary);
+       end if;
+       end Loop;
+    close emp_cur;
+  END //
+
+-----------------------------------------------------------------------------------------------------------------------
+
+select * from old_emp;
+    -> //
++--------+------------+----------+--------+
+| emp_id | fname      | lname    | salary |
++--------+------------+----------+--------+
+|      3 | Nikita     | Londhe   |   3000 |
+|      5 | Sanjana    | Ghorpade |  10000 |
+|     12 | Shrawani   | Gaikwad  |   4000 |
+|     19 | Shivanjali | Karande  |   2000 |
++--------+------------+----------+--------+
+4 rows in set (0.00 sec)
+
+mysql> delimiter ;
+mysql> select * from new_emp;
++--------+---------+------------+--------+
+| emp_id | fname   | lname      | salary |
++--------+---------+------------+--------+
+|      1 | Yashica | Mayaramani |   4000 |
+|      2 | Diya    | Bhat       |   3000 |
+|      3 | Nikita  | Londhe     |   3000 |
+|      5 | Sanjana | Ghorpade   |  10000 |
+|     23 | Kalyani | Patil      |   3900 |
++--------+---------+------------+--------+
+5 rows in set (0.00 sec)
+
+*****************************************************************
+
+mysql> call merge_data();
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> select * from new_emp;
++--------+------------+------------+--------+
+| emp_id | fname      | lname      | salary |
++--------+------------+------------+--------+
+|      1 | Yashica    | Mayaramani |   4000 |
+|      2 | Diya       | Bhat       |   3000 |
+|      3 | Nikita     | Londhe     |   3000 |
+|      5 | Sanjana    | Ghorpade   |  10000 |
+|     12 | Shrawani   | Gaikwad    |   4000 |
+|     19 | Shivanjali | Karande    |   2000 |
+|     23 | Kalyani    | Patil      |   3900 |
++--------+------------+------------+--------+
+7 rows in set (0.00 sec)
