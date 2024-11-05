@@ -1,0 +1,363 @@
+
+
+ create table PlacementDrive(
+    -> drive_id int primary key auto_increment,
+    -> pcompany_name varchar(50) not null,
+    -> package decimal(10,2) not null,
+    -> plocation varchar(20));
+Query OK, 0 rows affected (0.03 sec)
+
+
+create table Training(
+    -> t_id int primary key auto_increment,
+    -> tcompany_name varchar(50) not null,
+    -> t_fee decimal(10,2) not null,
+    -> t_year YEAR);
+Query OK, 0 rows affected (0.03 sec)
+
+
+create table Student(
+s_id int primary key auto_increment,
+s_name varchar(30) not null,
+cgpa decimal(10,2) not null,
+s_branch varchar(30) not null,
+s_dob DATE not null,
+drive_id int,
+t_id int,
+foreign key (drive_id) references PlacementDrive(drive_id) on delete cascade,
+foreign key (t_id) references Training(t_id) on delete cascade);
+
+-------------------------------------------------------------------------------------------
+
+insert into PlacementDrive(
+    -> pcompany_name,package,plocation)
+    -> values
+    -> ("Dell Technologies",35000,"Bangalore"),
+    -> ("Barclays",75000,"Pune"),
+    -> ("BNY Mellon",70000,"Pune"),
+    -> ("General Mills",35000,"Mumbai"),
+    -> ("Mastercard",40000,"Mumbai"),
+    -> ("BMC",30000,"Pune"),
+    -> ("Arista Networks",35000,"Pune"),
+    -> ("Siemens",35000,"Hyderabad"),
+    -> ("Deutsche Bank",40000,"Bangalore");
+Query OK, 9 rows affected (0.02 sec)
+Records: 9  Duplicates: 0  Warnings: 0
+
+mysql> select * from PlacementDrive;
++----------+-------------------+----------+-----------+
+| drive_id | pcompany_name     | package  | plocation |
++----------+-------------------+----------+-----------+
+|        1 | Dell Technologies | 35000.00 | Bangalore |
+|        2 | Barclays          | 75000.00 | Pune      |
+|        3 | BNY Mellon        | 70000.00 | Pune      |
+|        4 | General Mills     | 35000.00 | Mumbai    |
+|        5 | Mastercard        | 40000.00 | Mumbai    |
+|        6 | BMC               | 30000.00 | Pune      |
+|        7 | Arista Networks   | 35000.00 | Pune      |
+|        8 | Siemens           | 35000.00 | Hyderabad |
+|        9 | Deutsche Bank     | 40000.00 | Bangalore |
++----------+-------------------+----------+-----------+
+9 rows in set (0.00 sec)
+
+
+---------------------------------------------------------------------------------------
+
+insert into Training
+    -> (tcompany_name,t_fee,t_year)
+    -> values
+    -> ("BNY Mellon",15000,"2022"),
+    -> ("Barclays",10000,"2019"),
+    -> ("Dell Technologies",5000,"2020"),
+    -> ("Mastercard",8000,"2021"),
+    -> ("BMC",10000,"2020"),
+    -> ("BMC",12000,"2022"),
+    -> ("Barclays",18000,"2020"),
+    -> ("Mastercard",5000,"2019"),
+    -> ("BNY Mellon",13000,"2019");
+Query OK, 9 rows affected (0.01 sec)
+Records: 9  Duplicates: 0  Warnings: 0
+
+mysql> select * from Training;
++------+-------------------+----------+--------+
+| t_id | tcompany_name     | t_fee    | t_year |
++------+-------------------+----------+--------+
+|    1 | BNY Mellon        | 15000.00 |   2022 |
+|    2 | Barclays          | 10000.00 |   2019 |
+|    3 | Dell Technologies |  5000.00 |   2020 |
+|    4 | Mastercard        |  8000.00 |   2021 |
+|    5 | BMC               | 10000.00 |   2020 |
+|    6 | BMC               | 12000.00 |   2022 |
+|    7 | Barclays          | 18000.00 |   2020 |
+|    8 | Mastercard        |  5000.00 |   2019 |
+|    9 | BNY Mellon        | 13000.00 |   2019 |
++------+-------------------+----------+--------+
+9 rows in set (0.00 sec)
+
+----------------------------------------------------------------------------
+
+insert into Student
+    -> (s_name,cgpa,s_branch,s_dob,drive_id,t_id)
+    -> values
+    -> ("Shivanjali",8.85,"Computer","2004-01-19",1,3),
+    -> ("Nikita",7.90,"Computer","2004-10-25",2,7),
+    -> ("Anjali",7.34,"IT","2005-01-10",4,5),
+    -> ("Diya",8.12,"Computer","2004-05-03",6,4),
+    -> ("Dhanashree",6.23,"IT","2005-02-11",1,1),
+    -> ("Anuja",9.23,"ENTC","2004-11-12",7,7),
+    -> ("Shrawani",6.12,"IT","2004-07-23",8,3),
+    -> ("Alina",7.90,"Computer","2003-12-31",2,2),
+    -> ("Aakanksha",6.85,"ENTC","2004-06-05",9,3);
+Query OK, 9 rows affected (0.01 sec)
+Records: 9  Duplicates: 0  Warnings: 0
+
+mysql> select * from Student;
++------+------------+------+----------+------------+----------+------+
+| s_id | s_name     | cgpa | s_branch | s_dob      | drive_id | t_id |
++------+------------+------+----------+------------+----------+------+
+|    1 | Shivanjali | 8.85 | Computer | 2004-01-19 |        1 |    3 |
+|    2 | Nikita     | 7.90 | Computer | 2004-10-25 |        2 |    7 |
+|    3 | Anjali     | 7.34 | IT       | 2005-01-10 |        4 |    5 |
+|    4 | Diya       | 8.12 | Computer | 2004-05-03 |        6 |    4 |
+|    6 | Anuja      | 9.23 | ENTC     | 2004-11-12 |        7 |    7 |
+|    8 | Alina      | 7.90 | Computer | 2003-12-31 |        2 |    2 |
+|    9 | Aakanksha  | 6.85 | ENTC     | 2004-06-05 |        9 |    3 |
++------+------------+------+----------+------------+----------+------+
+9 rows in set (0.00 sec)
+
+-----------------------------------------------------------------------------------------
+
+//1. Find the Student details and Placement details using NATURAL JOIN.
+
+ select s.*, p.*
+    -> from
+    -> Student s
+    -> NATURAL JOIN PlacementDrive p
+    -> ;
++------+------------+------+----------+------------+----------+------+----------+-------------------+----------+-----------+
+| s_id | s_name     | cgpa | s_branch | s_dob      | drive_id | t_id | drive_id | pcompany_name     | package  | plocation |
++------+------------+------+----------+------------+----------+------+----------+-------------------+----------+-----------+
+|    1 | Shivanjali | 8.85 | Computer | 2004-01-19 |        1 |    3 |        1 | Dell Technologies | 35000.00 | Bangalore |
+|    2 | Nikita     | 7.90 | Computer | 2004-10-25 |        2 |    7 |        2 | Barclays          | 75000.00 | Pune      |
+|    3 | Anjali     | 7.34 | IT       | 2005-01-10 |        4 |    5 |        4 | General Mills     | 35000.00 | Mumbai    |
+|    4 | Diya       | 8.12 | Computer | 2004-05-03 |        6 |    4 |        6 | BMC               | 30000.00 | Pune      |
+|    6 | Anuja      | 9.23 | ENTC     | 2004-11-12 |        7 |    7 |        7 | Arista Networks   | 35000.00 | Pune      |
+|    8 | Alina      | 7.90 | Computer | 2003-12-31 |        2 |    2 |        2 | Barclays          | 75000.00 | Pune      |
++------+------------+------+----------+------------+----------+------+----------+-------------------+----------+-----------+
+6 rows in set (0.01 sec)
+
+-----------------------------------------------------------------------------------------
+
+//2. Find all the student details with company_name who have conducted in same drive
+
+select s.*, p.pcompany_name
+    -> from
+    -> Student s
+    -> INNER JOIN
+    -> PlacementDrive p
+    -> on s.drive_id = p.drive_id
+    -> order by s.drive_id;
++------+------------+------+----------+------------+----------+------+-------------------+
+| s_id | s_name     | cgpa | s_branch | s_dob      | drive_id | t_id | pcompany_name     |
++------+------------+------+----------+------------+----------+------+-------------------+
+|    1 | Shivanjali | 8.85 | Computer | 2004-01-19 |        1 |    3 | Dell Technologies |
+|    2 | Nikita     | 7.90 | Computer | 2004-10-25 |        2 |    7 | Barclays          |
+|    8 | Alina      | 7.90 | Computer | 2003-12-31 |        2 |    2 | Barclays          |
+|    3 | Anjali     | 7.34 | IT       | 2005-01-10 |        4 |    5 | General Mills     |
+|    4 | Diya       | 8.12 | Computer | 2004-05-03 |        6 |    4 | BMC               |
+|    6 | Anuja      | 9.23 | ENTC     | 2004-11-12 |        7 |    7 | Arista Networks   |
++------+------------+------+----------+------------+----------+------+-------------------+
+6 rows in set (0.00 sec)
+-------------------------------------------------------------------------------------------
+
+//3. List all the Student name and Student branch of Student having package 35K
+
+ select s.s_name, s.s_branch, p.package
+    ->  from
+    ->  Student s
+    ->  INNER JOIN
+    ->  PlacementDrive p
+    ->  on s.drive_id = p.drive_id
+    ->  where p.package > 35000;
++--------+----------+----------+
+| s_name | s_branch | package  |
++--------+----------+----------+
+| Nikita | Computer | 75000.00 |
+| Alina  | Computer | 75000.00 |
++--------+----------+----------+
+2 rows in set (0.00 sec)
+------------------------------------------------------------------------------------------
+
+//4. List all the student names ,company_name having T_fee more than 20000
+
+select s.s_name as Student_Name, t.tcompany_name as Company_Name
+    -> from
+    -> Student s
+    -> INNER JOIN
+    -> Training t
+    -> on s.t_id = t.t_id
+    -> where t.t_fee > 10000;
++--------------+--------------+
+| Student_Name | Company_Name |
++--------------+--------------+
+| Alina        | Barclays     |
+| Nikita       | Barclays     |
+| Anuja        | Barclays     |
++--------------+--------------+
+3 rows in set (0.00 sec)
+-----------------------------------------------------------------------------------------
+
+//5. Display all training details attended by “Shivanjali” in year 2020
+
+select t.* from Training t
+    ->  INNER JOIN
+    ->  Student s
+    ->  on t.t_id = s.t_id
+    ->  where s.s_name = "Shivanjali"
+    ->  AND
+    ->  t.t_year = "2020";
++------+-------------------+---------+--------+
+| t_id | tcompany_name     | t_fee   | t_year |
++------+-------------------+---------+--------+
+|    3 | Dell Technologies | 5000.00 |   2020 |
++------+-------------------+---------+--------+
+1 row in set (0.00 sec)
+-----------------------------------------------------------------------------------------
+
+//6. list the total number of companies who conduct training before 2020
+
+ select count(t_id) from Training
+    -> where t_year < "2020";
++-------------+
+| count(t_id) |
++-------------+
+|           3 |
++-------------+
+1 row in set (0.01 sec)
+------------------------------------------------------------------------------------------
+
+//7. List the students name with company ‘Barclays’ and location ’Pune’
+
+ select s.s_name as "Students_with_company_Barclays_Location_Pune"
+    -> from Student s
+    -> INNER JOIN
+    -> PlacementDrive p
+    -> on s.drive_id = p.drive_id
+    -> where p.pcompany_name = "Barclays"
+    -> AND
+    -> p.plocation = "Pune";
++----------------------------------------------+
+| Students_with_company_Barclays_Location_Pune |
++----------------------------------------------+
+| Nikita                                       |
+| Alina                                        |
++----------------------------------------------+
+2 rows in set (0.00 sec)
+------------------------------------------------------------------------------------------
+
+//8. Find the names of all Students who have joined ‘Dell Technologies‘ training in 2020 .
+
+ select s.s_name as "Students_joined_DELL_in_2020"
+    -> from
+    -> Student s
+    -> INNER JOIN
+    -> Training t
+    -> ON
+    -> s.t_id = t.t_id
+    -> where
+    -> t.tcompany_name = "Dell Technologies"
+    -> AND
+    -> t.t_year = "2020";
++------------------------------+
+| Students_joined_DELL_in_2020 |
++------------------------------+
+| Shivanjali                   |
++------------------------------+
+1 row in set (0.00 sec)
+-----------------------------------------------------------------------------------------
+
+//9. Create a view showing the Student and Training details.
+
+create view student_training_details
+    -> AS
+    -> select * from
+    -> student s
+    -> NATURAL JOIN
+    -> training t;
+Query OK, 0 rows affected (0.02 sec)
+
+************************
+ select * from student_training_details;
++------+------+------------+------+----------+------------+----------+-------------------+----------+--------+
+| t_id | s_id | s_name     | cgpa | s_branch | s_dob      | drive_id | tcompany_name     | t_fee    | t_year |
++------+------+------------+------+----------+------------+----------+-------------------+----------+--------+
+|    3 |    1 | Shivanjali | 8.85 | Computer | 2004-01-19 |        1 | Dell Technologies |  5000.00 |   2020 |
+|    7 |    2 | Nikita     | 7.90 | Computer | 2004-10-25 |        2 | Barclays          | 18000.00 |   2020 |
+|    5 |    3 | Anjali     | 7.34 | IT       | 2005-01-10 |        4 | BMC               | 10000.00 |   2020 |
+|    4 |    4 | Diya       | 8.12 | Computer | 2004-05-03 |        6 | Mastercard        |  8000.00 |   2021 |
+|    7 |    6 | Anuja      | 9.23 | ENTC     | 2004-11-12 |        7 | Barclays          | 18000.00 |   2020 |
+|    2 |    8 | Alina      | 7.90 | Computer | 2003-12-31 |        2 | Barclays          | 11500.00 |   2019 |
++------+------+------------+------+----------+------------+----------+-------------------+----------+--------+
+6 rows in set (0.00 sec)
+
+----------------------------------------------------------------------------------------
+
+//10. 
+
+**************************
+// INSERT
+
+ INSERT INTO Student (s_name, cgpa, s_branch, s_dob, drive_id, t_id)
+    -> VALUES ('Alice Smith', 8.5, 'Computer Science', '2002-05-10', 1, 1);
+Query OK, 1 row affected (0.01 sec)
+
+ select * from student_training_details;
++------+------+-------------+------+------------------+------------+----------+-------------------+----------+--------+
+| t_id | s_id | s_name      | cgpa | s_branch         | s_dob      | drive_id | tcompany_name     | t_fee    | t_year |
++------+------+-------------+------+------------------+------------+----------+-------------------+----------+--------+
+|    3 |    1 | Shivanjali  | 8.85 | Computer         | 2004-01-19 |        1 | Dell Technologies |  5000.00 |   2020 |
+|    7 |    2 | Nikita      | 7.90 | Computer         | 2004-10-25 |        2 | Barclays          | 18000.00 |   2020 |
+|    5 |    3 | Anjali      | 7.34 | IT               | 2005-01-10 |        4 | BMC               | 10000.00 |   2020 |
+|    4 |    4 | Diya        | 8.12 | Computer         | 2004-05-03 |        6 | Mastercard        |  8000.00 |   2021 |
+|    7 |    6 | Anuja       | 9.23 | ENTC             | 2004-11-12 |        7 | Barclays          | 18000.00 |   2020 |
+|    2 |    8 | Alina       | 7.90 | Computer         | 2003-12-31 |        2 | Barclays          | 11500.00 |   2019 |
+|    1 |   10 | Alice Smith | 8.50 | Computer Science | 2002-05-10 |        1 | BNY Mellon        | 15000.00 |   2022 |
++------+------+-------------+------+------------------+------------+----------+-------------------+----------+--------+
+7 rows in set (0.00 sec)
+
+*****************************************
+// UPDATE
+UPDATE StudentTrainingView 
+SET cgpa = 9.0 
+WHERE s_id = 1;
+
+****************************************
+// DELETE
+ delete from student_training_details
+    -> where s_id = 10;
+ERROR 1395 (HY000): Can not delete from join view 'assign_1.student_training_details'
+
+mysql> DELETE FROM Student WHERE s_id = 10;
+Query OK, 1 row affected (0.01 sec)
+
+ select * from student_training_details;
++------+------+------------+------+----------+------------+----------+-------------------+----------+--------+
+| t_id | s_id | s_name     | cgpa | s_branch | s_dob      | drive_id | tcompany_name     | t_fee    | t_year |
++------+------+------------+------+----------+------------+----------+-------------------+----------+--------+
+|    3 |    1 | Shivanjali | 8.85 | Computer | 2004-01-19 |        1 | Dell Technologies |  5000.00 |   2020 |
+|    7 |    2 | Nikita     | 7.90 | Computer | 2004-10-25 |        2 | Barclays          | 18000.00 |   2020 |
+|    5 |    3 | Anjali     | 7.34 | IT       | 2005-01-10 |        4 | BMC               | 10000.00 |   2020 |
+|    4 |    4 | Diya       | 8.12 | Computer | 2004-05-03 |        6 | Mastercard        |  8000.00 |   2021 |
+|    7 |    6 | Anuja      | 9.23 | ENTC     | 2004-11-12 |        7 | Barclays          | 18000.00 |   2020 |
+|    2 |    8 | Alina      | 7.90 | Computer | 2003-12-31 |        2 | Barclays          | 11500.00 |   2019 |
++------+------+------------+------+----------+------------+----------+-------------------+----------+--------+
+6 rows in set (0.00 sec)
+
+******************************************
+//DROP
+DROP VIEW IF EXISTS student_training_details;
+
+
+-------------------------------------------------------------------------------------------
+
+
