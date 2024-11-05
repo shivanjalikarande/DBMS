@@ -1,0 +1,329 @@
+
+
+ create table PlacementDrive(
+    -> drive_id int primary key auto_increment,
+    -> pcompany_name varchar(50) not null,
+    -> package decimal(10,2) not null,
+    -> plocation varchar(20));
+Query OK, 0 rows affected (0.03 sec)
+
+
+create table Training(
+    -> t_id int primary key auto_increment,
+    -> tcompany_name varchar(50) not null,
+    -> t_fee decimal(10,2) not null,
+    -> t_year YEAR);
+Query OK, 0 rows affected (0.03 sec)
+
+
+create table Student(
+s_id int primary key auto_increment,
+s_name varchar(30) not null,
+cgpa decimal(10,2) not null,
+s_branch varchar(30) not null,
+s_dob DATE not null,
+drive_id int,
+t_id int,
+foreign key (drive_id) references PlacementDrive(drive_id) on delete cascade,
+foreign key (t_id) references Training(t_id) on delete cascade);
+
+-------------------------------------------------------------------------------------------
+
+insert into PlacementDrive(
+    -> pcompany_name,package,plocation)
+    -> values
+    -> ("Dell Technologies",35000,"Bangalore"),
+    -> ("Barclays",75000,"Pune"),
+    -> ("BNY Mellon",70000,"Pune"),
+    -> ("General Mills",35000,"Mumbai"),
+    -> ("Mastercard",40000,"Mumbai"),
+    -> ("BMC",30000,"Pune"),
+    -> ("Arista Networks",35000,"Pune"),
+    -> ("Siemens",35000,"Hyderabad"),
+    -> ("Deutsche Bank",40000,"Bangalore");
+Query OK, 9 rows affected (0.02 sec)
+Records: 9  Duplicates: 0  Warnings: 0
+
+mysql> select * from PlacementDrive;
++----------+-------------------+----------+-----------+
+| drive_id | pcompany_name     | package  | plocation |
++----------+-------------------+----------+-----------+
+|        1 | Dell Technologies | 35000.00 | Bangalore |
+|        2 | Barclays          | 75000.00 | Pune      |
+|        3 | BNY Mellon        | 70000.00 | Pune      |
+|        4 | General Mills     | 35000.00 | Mumbai    |
+|        5 | Mastercard        | 40000.00 | Mumbai    |
+|        6 | BMC               | 30000.00 | Pune      |
+|        7 | Arista Networks   | 35000.00 | Pune      |
+|        8 | Siemens           | 35000.00 | Hyderabad |
+|        9 | Deutsche Bank     | 40000.00 | Bangalore |
++----------+-------------------+----------+-----------+
+9 rows in set (0.00 sec)
+
+
+---------------------------------------------------------------------------------------
+
+insert into Training
+    -> (tcompany_name,t_fee,t_year)
+    -> values
+    -> ("BNY Mellon",15000,"2022"),
+    -> ("Barclays",10000,"2019"),
+    -> ("Dell Technologies",5000,"2020"),
+    -> ("Mastercard",8000,"2021"),
+    -> ("BMC",10000,"2020"),
+    -> ("BMC",12000,"2022"),
+    -> ("Barclays",18000,"2020"),
+    -> ("Mastercard",5000,"2019"),
+    -> ("BNY Mellon",13000,"2019");
+Query OK, 9 rows affected (0.01 sec)
+Records: 9  Duplicates: 0  Warnings: 0
+
+mysql> select * from Training;
++------+-------------------+----------+--------+
+| t_id | tcompany_name     | t_fee    | t_year |
++------+-------------------+----------+--------+
+|    1 | BNY Mellon        | 15000.00 |   2022 |
+|    2 | Barclays          | 10000.00 |   2019 |
+|    3 | Dell Technologies |  5000.00 |   2020 |
+|    4 | Mastercard        |  8000.00 |   2021 |
+|    5 | BMC               | 10000.00 |   2020 |
+|    6 | BMC               | 12000.00 |   2022 |
+|    7 | Barclays          | 18000.00 |   2020 |
+|    8 | Mastercard        |  5000.00 |   2019 |
+|    9 | BNY Mellon        | 13000.00 |   2019 |
++------+-------------------+----------+--------+
+9 rows in set (0.00 sec)
+
+----------------------------------------------------------------------------
+
+insert into Student
+    -> (s_name,cgpa,s_branch,s_dob,drive_id,t_id)
+    -> values
+    -> ("Shivanjali",8.85,"Computer","2004-01-19",1,3),
+    -> ("Nikita",7.90,"Computer","2004-10-25",2,7),
+    -> ("Anjali",7.34,"IT","2005-01-10",4,5),
+    -> ("Diya",8.12,"Computer","2004-05-03",6,4),
+    -> ("Dhanashree",6.23,"IT","2005-02-11",1,1),
+    -> ("Anuja",9.23,"ENTC","2004-11-12",7,7),
+    -> ("Shrawani",6.12,"IT","2004-07-23",8,3),
+    -> ("Alina",7.90,"Computer","2003-12-31",2,2),
+    -> ("Aakanksha",6.85,"ENTC","2004-06-05",9,3);
+Query OK, 9 rows affected (0.01 sec)
+Records: 9  Duplicates: 0  Warnings: 0
+
+mysql> select * from Student;
++------+------------+------+----------+------------+----------+------+
+| s_id | s_name     | cgpa | s_branch | s_dob      | drive_id | t_id |
++------+------------+------+----------+------------+----------+------+
+|    1 | Shivanjali | 8.85 | Computer | 2004-01-19 |        1 |    3 |
+|    2 | Nikita     | 7.90 | Computer | 2004-10-25 |        2 |    7 |
+|    3 | Anjali     | 7.34 | IT       | 2005-01-10 |        4 |    5 |
+|    4 | Diya       | 8.12 | Computer | 2004-05-03 |        6 |    4 |
+|    5 | Dhanashree | 6.23 | IT       | 2005-02-11 |        1 |    1 |
+|    6 | Anuja      | 9.23 | ENTC     | 2004-11-12 |        7 |    7 |
+|    7 | Shrawani   | 6.12 | IT       | 2004-07-23 |        8 |    3 |
+|    8 | Alina      | 7.90 | Computer | 2003-12-31 |        2 |    2 |
+|    9 | Aakanksha  | 6.85 | ENTC     | 2004-06-05 |        9 |    3 |
++------+------------+------+----------+------------+----------+------+
+9 rows in set (0.00 sec)
+
+-----------------------------------------------------------------------------------------
+
+//2. Display all students details with branch ‘Computer ‘and ‘It’ and student name
+starting with 'a' or 'd'.
+
+ select * from Student
+    -> where
+    -> s_branch IN ("Computer","IT")
+    -> AND
+    -> s_name LIKE 'a%' OR s_name LIKE 'd%';
++------+------------+------+----------+------------+----------+------+
+| s_id | s_name     | cgpa | s_branch | s_dob      | drive_id | t_id |
++------+------------+------+----------+------------+----------+------+
+|    3 | Anjali     | 7.34 | IT       | 2005-01-10 |        4 |    5 |
+|    4 | Diya       | 8.12 | Computer | 2004-05-03 |        6 |    4 |
+|    5 | Dhanashree | 6.23 | IT       | 2005-02-11 |        1 |    1 |
+|    8 | Alina      | 7.90 | Computer | 2003-12-31 |        2 |    2 |
++------+------------+------+----------+------------+----------+------+
+4 rows in set (0.00 sec)
+
+----------------------------------------------------------------------------------------
+
+//3.  list the number of different companies.(use of distinct)
+
+ select distinct pcompany_name as Companies from PlacementDrive;
++-------------------+
+| Companies         |
++-------------------+
+| Dell Technologies |
+| Barclays          |
+| BNY Mellon        |
+| General Mills     |
+| Mastercard        |
+| BMC               |
+| Arista Networks   |
+| Siemens           |
+| Deutsche Bank     |
++-------------------+
+9 rows in set (0.00 sec)
+
+mysql> select count(distinct(pcompany_name)) AS "No of Companies" from PlacementDrive;
++-----------------+
+| No of Companies |
++-----------------+
+|               9 |
++-----------------+
+1 row in set (0.01 sec)
+
+-------------------------------------------------------------------------------------------
+
+//4. Give 15% increase in fee of the Training whose joining year is 2019.
+
+update Training set t_fee = 1.15 * t_fee
+    -> where t_year = "2019";
+Query OK, 3 rows affected (0.01 sec)
+Rows matched: 3  Changed: 3  Warnings: 0
+
+ select * from Training;
++------+-------------------+----------+--------+
+| t_id | tcompany_name     | t_fee    | t_year |
++------+-------------------+----------+--------+
+|    1 | BNY Mellon        | 15000.00 |   2022 |
+|    2 | Barclays          | 11500.00 |   2019 |
+|    3 | Dell Technologies |  5000.00 |   2020 |
+|    4 | Mastercard        |  8000.00 |   2021 |
+|    5 | BMC               | 10000.00 |   2020 |
+|    6 | BMC               | 12000.00 |   2022 |
+|    7 | Barclays          | 18000.00 |   2020 |
+|    8 | Mastercard        |  5750.00 |   2019 |
+|    9 | BNY Mellon        | 14950.00 |   2019 |
++------+-------------------+----------+--------+
+9 rows in set (0.00 sec)
+
+-------------------------------------------------------------------------------------
+
+//5. Delete Student details having CGPA score less than 7.
+
+ delete from Student where cgpa < 7;
+Query OK, 3 rows affected (0.01 sec)
+
+mysql> select * from Student;
++------+------------+------+----------+------------+----------+------+
+| s_id | s_name     | cgpa | s_branch | s_dob      | drive_id | t_id |
++------+------------+------+----------+------------+----------+------+
+|    1 | Shivanjali | 8.85 | Computer | 2004-01-19 |        1 |    3 |
+|    2 | Nikita     | 7.90 | Computer | 2004-10-25 |        2 |    7 |
+|    3 | Anjali     | 7.34 | IT       | 2005-01-10 |        4 |    5 |
+|    4 | Diya       | 8.12 | Computer | 2004-05-03 |        6 |    4 |
+|    6 | Anuja      | 9.23 | ENTC     | 2004-11-12 |        7 |    7 |
+|    8 | Alina      | 7.90 | Computer | 2003-12-31 |        2 |    2 |
++------+------------+------+----------+------------+----------+------+
+6 rows in set (0.00 sec)
+
+----------------------------------------------------------------------------------------
+
+//6. Find the names of companies belonging to pune or Mumbai
+
+ select pcompany_name,plocation from PlacementDrive where plocation in ("Pu
+ne","Mumbai");
++-----------------+-----------+
+| pcompany_name   | plocation |
++-----------------+-----------+
+| Barclays        | Pune      |
+| BNY Mellon      | Pune      |
+| General Mills   | Mumbai    |
+| Mastercard      | Mumbai    |
+| BMC             | Pune      |
+| Arista Networks | Pune      |
++-----------------+-----------+
+6 rows in set (0.00 sec)
+----------------------------------------------------------------------------------------
+//7. Find the student name who joined training in 1-1-2019 as well as in 1-1-2021t_id
+
+ select s_name from Student s, Training t
+    -> where s.t_id = t.t_id
+    -> and t_year in ("2019","2021");
++--------+
+| s_name |
++--------+
+| Alina  |
+| Diya   |
++--------+
+2 rows in set (0.00 sec)
+-----------------------------------------------------------------------------------------
+
+//8. Find the student name having maximum CGPA score and names of students
+having CGPA score between 7 to 9 .
+
+select s_name,cgpa from Student where cgpa =
+    -> (select max(cgpa) from Student);
++--------+------+
+| s_name | cgpa |
++--------+------+
+| Anuja  | 9.23 |
++--------+------+
+1 row in set (0.00 sec)
+
+-- second highest score
+ select s_name,cgpa from Student
+    ->  where cgpa = (
+    ->  select cgpa from student
+    ->  order by cgpa desc
+    ->  limit 1
+    ->  offset 1);
++------------+------+
+| s_name     | cgpa |
++------------+------+
+| Shivanjali | 8.85 |
++------------+------+
+1 row in set (0.00 sec)
+
+select s_name,cgpa from Student where cgpa between 7 and 9;
++------------+------+
+| s_name     | cgpa |
++------------+------+
+| Shivanjali | 8.85 |
+| Nikita     | 7.90 |
+| Anjali     | 7.34 |
+| Diya       | 8.12 |
+| Alina      | 7.90 |
++------------+------+
+5 rows in set (0.01 sec)
+-----------------------------------------------------------------------------------------
+//9. Display all Student name with T_id with decreasing order of Fees
+
+ select s.s_name, s.t_id,t.t_fee
+    -> from Student s, Training t
+    -> where s.t_id = t.t_id
+    -> order by t_fee desc;
++------------+------+----------+
+| s_name     | t_id | t_fee    |
++------------+------+----------+
+| Nikita     |    7 | 18000.00 |
+| Anuja      |    7 | 18000.00 |
+| Alina      |    2 | 11500.00 |
+| Anjali     |    5 | 10000.00 |
+| Diya       |    4 |  8000.00 |
+| Shivanjali |    3 |  5000.00 |
++------------+------+----------+
+6 rows in set (0.00 sec)
+-----------------------------------------------------------------------------------------
+
+//10. . Display PCompany name, S_name ,location and Package with Package 30K,
+40K and 50k
+
+ select s.s_name,p.pcompany_name,p.plocation, p.package
+    ->  from Student s, PlacementDrive p
+    ->  where s.drive_id = p.drive_id
+    ->  AND
+    ->  p.package IN (20000,30000,50000);
++--------+---------------+-----------+----------+
+| s_name | pcompany_name | plocation | package  |
++--------+---------------+-----------+----------+
+| Diya   | BMC           | Pune      | 30000.00 |
++--------+---------------+-----------+----------+
+1 row in set (0.00 sec)
+
+-------------------------------------------------------------------------------------------
+ 
+
