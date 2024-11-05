@@ -1,0 +1,105 @@
+
+
+
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
+import com.mongodb.client.FindIterable;
+import java.util.Scanner;
+import java.util.Iterator;
+import org.bson.Document;
+
+
+class DatabaseConnectivity
+{
+	public static void main(String [] args)
+	{
+		String uri = "mongodb://localhost:27017";
+		try(MongoClient mongo = new MongoClient(new MongoClientURI(uri)))
+		{
+			System.out.print("Connected successfully");
+			MongoDatabase db = mongo.getDatabase("te31442_db");
+			if(db.getCollection("students") == null)
+			{
+				db.createCollection("students");
+			}
+			MongoCollection<Document>collection = db.getCollection("students");
+			
+			Scanner sc = new Scanner(System.in);
+			int choice;
+			
+			while(true)
+			{
+				System.out.println("Enter your choice: \n1.Insert\n2.Update\n3.Retrive\n4.Delete\n");
+				choice = sc.nextInt();
+				
+				switch(choice)
+				{
+					case 1:
+						String stdname,branch;
+						int age;
+						double cgpa;
+						System.out.print("Enter name: ");
+						stdname = sc.next();
+						System.out.print("Enter age: ");
+						age = sc.nextInt();
+						System.out.print("Enter branch: ");
+						branch = sc.next();
+						System.out.print("Enter cgpa: ");
+						cgpa = sc.nextDouble();
+						
+						Document doc = new Document("stdname",stdname)
+								.append("age",age)
+								.append("branch", branch)
+								.append("cgpa", cgpa);
+						collection.insertOne(doc);
+						System.out.println("Document inserted successfully");
+						break;
+						
+					case 2:
+						System.out.print("Enter student name to update: ");
+						stdname = sc.next();
+						System.out.print("Enter new cgpa: ");
+						cgpa = sc.nextDouble();
+						collection.updateOne(Filters.eq("stdname",stdname), Updates.set("cgpa",cgpa));
+						System.out.println("Document updated successfully");
+						break;
+						
+					case 3:
+//						System.out.println("Enter name of student to find: ");
+						System.out.println("Retriving all documents");
+						FindIterable<Document>documents = collection.find();
+						Iterator itr = documents.iterator();
+						while(itr.hasNext())
+						{
+							System.out.println(itr.next());
+						}
+						System.out.println("Documents retrived successfully");
+						break;
+						
+					case 4:
+						System.out.print("Enter name of student to delete: ");
+						stdname = sc.next();
+						collection.deleteOne(Filters.eq("stdname",stdname));
+						System.out.println("Document deleted successfully");
+						break;
+						
+					case 5:
+						System.exit(0);
+						System.out.println("All openrations performed successfully!");
+						mongo.close();
+						sc.close();
+						break;
+				}
+			}
+			
+		}
+		catch(Exception e)
+		{
+			System.out.println(e);
+		}
+	}
+}
