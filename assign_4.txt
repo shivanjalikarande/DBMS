@@ -1,0 +1,130 @@
+
+//Stored Procedure
+ 
+create table student(
+    -> roll_no int not null,
+    -> stdname varchar(30) not null,
+    -> doi DATE default (CURDATE()),
+    -> book_name varchar(50) not null,
+    -> status char(1) not null default 'I',
+    -> primary key(roll_no,stdname,doi),
+    -> check(status IN ('I','R'))
+    -> );
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> create table fine(
+    -> roll_no int,
+    -> fine_date DATE default(CURDATE()),
+    -> fine int not null,
+    -> foreign key(roll_no) references student(roll_no) on delete no action,
+    -> check(roll_no >= 0)
+    -> );
+Query OK, 0 rows affected (0.07 sec)
+
+------------------------------------------------------------------------------------------------------------------
+
+mysql> insert into student(roll_no,stdname,doi,book_name)
+    -> values
+    -> (25,"Shivanjali Karande","2024-11-01","CNS"),
+    -> (32,"Nikita Londhe","2024-10-18","OOP"),
+    -> (25,"Shivanjali Karande","2024-08-11","Java"),
+    -> (25,"Shivanjali Karande","2024-06-01","Web"),
+    -> (32,"Nikita Londhe","2024-10-24","Java"),
+    -> (12,"Diya Bhat","2024-07-25","ADS"),
+    -> (5,"Sanjana","2024-10-20","DBMS")
+    -> ;
+Query OK, 7 rows affected (0.02 sec)
+Records: 7  Duplicates: 0  Warnings: 0
+
+mysql> select * from student;
++---------+--------------------+------------+-----------+--------+
+| roll_no | stdname            | doi        | book_name | status |
++---------+--------------------+------------+-----------+--------+
+|       5 | Sanjana            | 2024-10-20 | DBMS      | I      |
+|      12 | Diya Bhat          | 2024-07-25 | ADS       | I      |
+|      25 | Shivanjali Karande | 2024-06-01 | Web       | I      |
+|      25 | Shivanjali Karande | 2024-08-11 | Java      | I      |
+|      25 | Shivanjali Karande | 2024-11-01 | CNS       | I      |
+|      32 | Nikita Londhe      | 2024-10-18 | OOP       | I      |
+|      32 | Nikita Londhe      | 2024-10-24 | Java      | I      |
++---------+--------------------+------------+-----------+--------+
+7 rows in set (0.00 sec)
+
+------------------------------------------------------------------------------------------------------------------------ 
+
+create procedure book_return(IN r int, IN bname varchar(30), OUT amt int)
+ begin
+ declare x int;
+ declare fine_amt int default 0;
+ declare continue handler for NOT FOUND
+ begin
+ signal sqlstate "45000" set message_text="No record found";
+ end;
+ select DATEDIFF(CURDATE(),doi) into x
+ from student
+ where student.roll_no = r and student.book_name = bname;
+ if x < 15 then
+  set fine_amt = 0;
+ end if;
+ if x >= 15 and x <= 30 then
+   set fine_amt = (x-14) * 5;
+ end if;
+ if x > 30 then
+   set fine_amt = (x-30) * 50 + 5*15;
+ end if;
+ update student
+   set status = 'R'
+ where roll_no = r and book_name = bname;
+ insert into fine(roll_no,fine) values (r,fine_amt);
+ set amt = fine_amt;
+ end $$
+----------------------------------------------------------------------------------------------------------------------
+
+
+mysql> call book_return(25,"Java",@output);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call book_return(5,"DBMS",@output)
+    -> ;
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call book_return(12,"ADS",@output)
+    -> ;
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call book_return(32,"OOP",@output);
+Query OK, 1 row affected (0.02 sec)
+
+------------------------------------------------------------------------------------------------
+
+ select * from fine;
++---------+------------+------+
+| roll_no | fine_date  | fine |
++---------+------------+------+
+|      25 | 2024-11-06 | 2925 |
+|      25 | 2024-11-06 | 2925 |
+|       5 | 2024-11-06 |   15 |
+|      12 | 2024-11-06 | 3775 |
+|      32 | 2024-11-06 |   25 |
++---------+------------+------+
+5 rows in set (0.00 sec)
+
+mysql> select * from student;
++---------+--------------------+------------+-----------+--------+
+| roll_no | stdname            | doi        | book_name | status |
++---------+--------------------+------------+-----------+--------+
+|       5 | Sanjana            | 2024-10-20 | DBMS      | R      |
+|      12 | Diya Bhat          | 2024-07-25 | ADS       | R      |
+|      25 | Shivanjali Karande | 2024-06-01 | Web       | I      |
+|      25 | Shivanjali Karande | 2024-08-11 | Java      | R      |
+|      25 | Shivanjali Karande | 2024-11-01 | CNS       | I      |
+|      32 | Nikita Londhe      | 2024-10-18 | OOP       | R      |
+|      32 | Nikita Londhe      | 2024-10-24 | Java      | I      |
++---------+--------------------+------------+-----------+--------+
+7 rows in set (0.00 sec)
+
+------------------------------------------------------------------------------------------------------------
+
+call book_return(2,"OOP",@output);
+ERROR 1644 (45000): No record found
+
