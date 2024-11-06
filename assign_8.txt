@@ -1,0 +1,162 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Scanner;
+
+class MySQLConnection
+{
+	public static void main(String [] args)
+	{
+
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			System.out.println("JDBC Driver Loaded");
+			
+			try
+			{
+			
+				String url = "jdbc:mysql://localhost:3306/student";
+				String username = "root";
+				String password = "9422";
+				
+				Connection con = DriverManager.getConnection(url,username,password);
+				Scanner sc = new Scanner(System.in);
+				
+				int choice;
+				while(true)
+				{
+					System.out.println("Enter your choice: ");
+					choice = sc.nextInt();
+					switch(choice)
+					{
+						case 1:
+							insert(con);
+							break;
+						case 2:
+							update(con);
+							break;
+						case 3:
+							read(con);
+							break;
+						case 4:
+							delete(con);
+							break;
+						case 5:
+							System.exit(0);
+							break;
+					}
+				}
+			}
+			catch(SQLException e)
+			{
+				System.out.println(e);
+			}
+		}
+		catch(Exception e) {
+			System.out.println(e.getMessage());
+			return;
+		}
+		
+	}
+	
+	static void insert(Connection con)
+	{
+		Scanner sc = new Scanner(System.in);
+		int sid;
+		String nm;
+		System.out.println("Enter id: ");
+		sid = sc.nextInt();
+		System.out.println("Enter name: ");
+		nm = sc.next();
+		try
+		{
+			String query = "Insert into student_info(id,name) values(?,?)";
+			PreparedStatement pst = con.prepareStatement(query);
+			pst.setInt(1,sid);
+			pst.setString(2,nm);
+			pst.execuetUpdate();
+		}
+		catch(SQLException e)
+		{
+			
+		}
+		
+;	}
+	
+	static void update(Connection con)
+	{
+		Scanner sc = new Scanner(System.in);
+		int sid;
+		String nm;
+		System.out.println("Enter id to update: ");
+		sid = sc.nextInt();
+		System.out.println("Enter new name: ");
+		nm = sc.next();
+		try
+		{
+			String query = "update student_info set name = ? where id= ?";
+			PreparedStatement pst = con.prepareStatement(query);
+			pst.setInt(2,sid);
+			pst.setString(1,nm);
+			pst.execuetUpdate();
+		}
+		catch(SQLException e)
+		{
+			
+		}
+	}
+	
+	static void read(Connection con)
+	{
+		Scanner sc = new Scanner(System.in);
+		int sid;
+		String nm;
+		System.out.println("Enter id to display details: ");
+		sid = sc.nextInt();
+		try
+		{
+//			String query = "Select * from user where id = ?";
+//			PreparedStatement pst = con.prepareStatement(query);
+//			pst.setInt(1,sid);
+//			pst.execuetQuery();
+			
+			String query = "Select * from user";
+			Statement st = con.createStatement();
+			ResultSet rs = st.executeQuery(query);
+			while(rs.next())
+			{
+				System.out.println("ID: "+rs.getInt("s_id"));
+			}
+			
+		}
+		catch(SQLException e)
+		{
+			
+		}
+	}
+	
+	static void delete(Connection con)
+	{
+		Scanner sc = new Scanner(System.in);
+		int sid;
+		String nm;
+		System.out.println("Enter id to delete: ");
+		sid = sc.nextInt();
+		try
+		{
+			String query = "Delete from student_info where id = ?";
+			PreparedStatement pst = con.prepareStatement(query);
+			pst.setInt(1,sid);
+			pst.executeQuery();
+		}
+		catch(SQLException e)
+		{
+			
+		}
+	}
+	
+}
+
