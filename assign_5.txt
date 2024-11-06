@@ -1,0 +1,120 @@
+create table stud_marks(
+    -> roll_no int primary key auto_increment,
+    -> stdname varchar(30) not null,
+    -> marks int not null,
+    -> check((marks > 0) AND (marks <= 1500))
+    -> );
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> create table result(
+    -> roll_no int primary key,
+    -> stdname varchar(30) not null,
+    -> class varchar(20) not null,
+    -> check(class in("Distinction","First Class","Higher Second Cl
+ass","Passed"))
+    -> );
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> insert into stud_marks(stdname,marks)
+    -> values
+    -> ("Shivanjali",1389),
+    -> ("Nikita",1400),
+    -> ("Sanjana",900),
+    -> ("Shrawani",700),
+    -> ("Yashica",845);
+Query OK, 5 rows affected (0.01 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+----------------------------------------------------------------------------------------------------------------------
+
+// Function
+
+ create function find_class(marks int)
+ returns varchar(30)
+ deterministic
+ begin
+ if marks <= 1500 and marks >= 990 then
+ return "Distinction";
+ elseif marks < 990 and marks >= 900 then
+ return "First Class";
+ elseif marks < 900 and marks >= 825 then
+ return "Higher Second Class";
+ else
+ return "Passed";
+ end if;
+ end $$
+Query OK, 0 rows affected (0.01 sec)
+
+----------------------------------------------------------------------------------------------------------------------
+
+// Procedure
+
+ create procedure get_result(IN roll_no int, OUT class varchar(20))
+ begin
+ declare s_name varchar(30);
+ declare v_marks int;
+   declare exit handler for not found
+    begin
+     signal sqlstate "45000" set message_text = "No Student Found";
+    end;
+   select stdname,marks INTO s_name,v_marks
+   from stud_marks
+   where stud_marks.roll_no = roll_no;
+   SELECT v_marks, s_name;
+   select find_class(v_marks) INTO class;
+   if exists(select 1 from result where result.roll_no = roll_no) then
+       update result
+       set
+        result.class = class, result.stdname = s_name
+       where
+         result.roll_no = roll_no;
+   else
+       insert into result(roll_no,stdname,class) values (roll_no,s_name,class);
+   end if;
+end $$
+Query OK, 0 rows affected (0.00 sec)
+
+
+-----------------------------------------------------------------------------------------------------------------------
+
+ CALL get_result(6, @vidhi);
++---------+--------+
+| v_marks | s_name |
++---------+--------+
+|    1200 | Vidhi  |
++---------+--------+
+1 row in set (0.00 sec)
+
+Query OK, 1 row affected (0.02 sec)
+
+mysql> SELECT @vidhi;
++-------------+
+| @vidhi      |
++-------------+
+| Distinction |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> call get_result(5,@yashica);
++---------+---------+
+| v_marks | s_name  |
++---------+---------+
+|     845 | Yashica |
++---------+---------+
+1 row in set (0.00 sec)
+
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select @yashica
+    -> ;
++---------------------+
+| @yashica            |
++---------------------+
+| Higher Second Class |
++---------------------+
+1 row in set (0.00 sec)
+
+mysql> call get_result(9,@sh);
+ERROR 1644 (45000): No Student Found
+
+------------------------------------------------------------------------------------------------------------------------
